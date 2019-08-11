@@ -1,0 +1,11 @@
+mod =  [
+	"NumericUI"
+]
+
+package = [
+	"resource_packages/NumericUI/NumericUI"
+]
+
+lua = [
+	"scripts/mods/NumericUI/*"
+]
