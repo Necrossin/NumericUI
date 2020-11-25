@@ -1473,7 +1473,7 @@ local function create_dynamic_portait_widget()
 			talk_indicator_glow = "voip_speaker_glow",
 			talk_indicator_highlight_glow = "voip_wave_glow",
 			talk_indicator = "voip_speaker",
-			ammo_string = "32",
+			ammo_string = "-1",
 			ammo_style = 1,
 			overcharge_icon = "tooltip_icon_overheat",
 			is_overcharge = false,
@@ -2090,38 +2090,45 @@ local function create_dynamic_health_widget()
 	}
 end
 
--- messy way to make sure it shows proper ammo for all characters and careers
--- "trust but verify"
-local ranger_buffs = TalentBuffTemplates and TalentBuffTemplates.dwarf_ranger
-local ranger_passive_ammo = ranger_buffs and ranger_buffs.bardin_ranger_passive_increased_ammunition
+local career_ammo = {}
+local career_talents_ammo = {}
+local cooldown_table = {}
 
-local wh_buffs = TalentBuffTemplates and TalentBuffTemplates.witch_hunter
-local bh_passive_ammo = wh_buffs and wh_buffs.victor_bountyhunter_passive_increased_ammunition
-local wh_talent_ammo = wh_buffs and wh_buffs.victor_witchhunter_max_ammo
+-- sigh, maybe this time it will work with all upcoming careers
 
-local elf_buffs = TalentBuffTemplates and TalentBuffTemplates.wood_elf
-local ww_passive_ammo = elf_buffs and elf_buffs.kerillian_waywatcher_passive_increased_ammunition
-local mg_talent_ammo = elf_buffs and elf_buffs.kerillian_maidenguard_max_ammo
-
-local es_buffs = TalentBuffTemplates and TalentBuffTemplates.empire_soldier
-local mh_passive_ammo = es_buffs and es_buffs.markus_huntsman_passive_increased_ammunition
-local mrc_talent_ammo = es_buffs and es_buffs.markus_mercenary_max_ammo
-
-
-local career_ammo = {
-	["dr_ranger"] = ranger_passive_ammo and ranger_passive_ammo.buffs and ranger_passive_ammo.buffs[1] and ranger_passive_ammo.buffs[1].multiplier or 0,
-	["wh_bountyhunter"] = bh_passive_ammo and bh_passive_ammo.buffs and bh_passive_ammo.buffs[1] and bh_passive_ammo.buffs[1].multiplier or 0,
-	["we_waywatcher"] = ww_passive_ammo and ww_passive_ammo.buffs and ww_passive_ammo.buffs[1] and ww_passive_ammo.buffs[1].multiplier or 0,
-	["es_huntsman"] = mh_passive_ammo and mh_passive_ammo.buffs and mh_passive_ammo.buffs[1] and mh_passive_ammo.buffs[1].multiplier or 0
-}
-
--- oh and talents, I suppose
-local career_talents_ammo = {
-	["we_maidenguard"] = mg_talent_ammo and mg_talent_ammo.buffs and mg_talent_ammo.buffs[1] and mg_talent_ammo.buffs[1].multiplier or 0,
-	["wh_captain"] = wh_talent_ammo and wh_talent_ammo.buffs and wh_talent_ammo.buffs[1] and wh_talent_ammo.buffs[1].multiplier or 0,
-	["es_mercenary"] = mrc_talent_ammo and mrc_talent_ammo.buffs and mrc_talent_ammo.buffs[1] and mrc_talent_ammo.buffs[1].multiplier or 0
-}
-
+for career, settings in pairs( CareerSettings ) do
+	
+	local ch = settings.profile_name
+	local pf = settings.playfab_name
+	local clear_name = CareerNameAchievementMapping[ career ]
+	
+	-- fix cooldown table
+	cooldown_table[ career ] = pf
+	
+	-- get ammo (passive/talents)
+	if TalentBuffTemplates and TalentBuffTemplates[ ch ] then
+		
+		local buffs_list = TalentBuffTemplates[ ch ]
+		
+		for buffname, tbl in pairs( buffs_list ) do
+			-- passive ammunition bonus
+			if clear_name and string.find( buffname, clear_name ) and ( string.find( buffname, "passive_increased_ammunition" ) or string.find( buffname, "passive_max_ammo" ) ) then
+				if tbl.buffs and tbl.buffs[1] and tbl.buffs[1].multiplier then
+					career_ammo[ career ] = tbl.buffs[1].multiplier
+				end
+			end
+			
+			-- talents ammo bonus
+			if clear_name and string.find( buffname, clear_name ) and string.find( buffname, "_max_ammo" ) and not string.find( buffname, "passive_max_ammo" ) then
+				if tbl.buffs and tbl.buffs[1] and tbl.buffs[1].multiplier then
+					career_talents_ammo[ career ] = tbl.buffs[1].multiplier
+				end
+			end
+		end
+		
+	end
+	
+end
 
 -- based on the only way to get ammo from teammates
 local ammo_delta = 0.005
@@ -2294,37 +2301,6 @@ mod:hook( UnitFramesHandler, "_create_unit_frame_by_type", function (func, self,
 
 	return unit_frame	
 end)
-
-
--- get direct cooldown times in case if they will be changed at some point
-local cooldown_table = {
-	
-	-- kruber
-	["es_mercenary"] = "es_3",
-	["es_huntsman"] = "es_1",
-	["es_knight"] = "es_2",
-	
-	-- dwarf
-	["dr_ranger"] = "dr_3",
-	["dr_ironbreaker"] = "dr_1",
-	["dr_slayer"] = "es_2",
-	
-	-- elf
-	["we_waywatcher"] = "we_3",
-	["we_maidenguard"] = "we_2",
-	["we_shade"] = "we_1",
-	
-	-- victor
-	["wh_captain"] = "wh_3",
-	["wh_bountyhunter"] = "wh_2",
-	["wh_zealot"] = "wh_1",
-	
-	-- sienna
-	["bw_scholar"] = "bw_1",
-	["bw_adept"] = "bw_2",
-	["bw_unchained"] = "bw_3",
-
-}
 
 -- and make sure they will be updated properly
 -- "UnitFramesHandler._sync_player_stats"
