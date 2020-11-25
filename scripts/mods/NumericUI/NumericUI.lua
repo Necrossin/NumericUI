@@ -1315,7 +1315,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
 						local check = ammo_progress and ammo_progress <= 1 and ammo_progress > 0.5
 						return not content.is_overcharge and check
 					end
@@ -1328,7 +1328,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
 						local check = ammo_progress and ammo_progress <= 0.5 and ammo_progress > 0.25
 						return not content.is_overcharge and check
 					end
@@ -1341,7 +1341,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
 						local check = ammo_progress and ammo_progress <= 0.25 and ammo_progress > 0
 						return not content.is_overcharge and check
 					end
@@ -1354,7 +1354,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
 						local check = ammo_progress and ammo_progress == 0
 						return not content.is_overcharge and check 
 					end
@@ -1371,7 +1371,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
 						local check = ammo_progress and ammo_progress >= 0
 						return not content.is_overcharge and check
 					end
@@ -1388,7 +1388,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
 						local check = ammo_progress and ammo_progress >= 0
 						return not content.is_overcharge and check
 					end
@@ -1475,6 +1475,7 @@ local function create_dynamic_portait_widget()
 			talk_indicator = "voip_speaker",
 			ammo_string = "-1",
 			ammo_style = 1,
+			ammo_percent_fix = 1,
 			overcharge_icon = "tooltip_icon_overheat",
 			is_overcharge = false,
 			display_portrait_icon = false,
@@ -2693,6 +2694,10 @@ mod:hook( UnitFramesHandler, "_sync_player_stats", function (func, self, unit_fr
 
 			if widget2 then
 				local widget2_content = widget2.content
+				
+				if widget2_content and widget2_content.ammo_percent and widget2_content.ammo_percent_fix then
+					widget2_content.ammo_percent_fix = widget2_content.ammo_percent * 1
+				end
 				
 				if data.show_teammate_ammo == 1 or data.show_teammate_ammo == true then -- backward compatibility
 					widget2_content.ammo_string = ""..cur_ammo..""..( is_overcharge and "%" or "" )
