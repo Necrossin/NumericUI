@@ -5,12 +5,8 @@ local SIZE_Y = 1080
 local RETAINED_MODE_ENABLED = true
 local portrait_scale = 1
 
--- gonna keep it here for referense, in case if I will have to do more workaround like this
---local PRE_1_2_1 = (tonumber(script_data.settings.content_revision) < 123106)
-
 -- controller UI -----------------------------------------------------------
 
--- just so I can align that stupid cooldown properly :O
 local custom_controller_ui_scenegraph = {
 	vertical_alignment = "bottom",
 	parent = "root",
@@ -34,83 +30,11 @@ local settings_controller_ui = {
 	}
 }
 
--- now thats a needlessly long function name, right?
+-- it is almost the same as the snipped for pc ui, maybe I should just merge them?
 local function create_dynamic_health_widget_local_player_controller_ui()
 	return {
-		scenegraph_id = "pivot",
 		element = {
 			passes = {
-				{
-					pass_type = "texture",
-					style_id = "hp_bar_highlight",
-					texture_id = "hp_bar_highlight",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content, style)
-						return not content.has_shield
-					end
-				},
-				{
-					style_id = "grimoire_debuff_divider",
-					texture_id = "grimoire_debuff_divider",
-					pass_type = "texture",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						local hp_bar_content = content.hp_bar
-						local internal_bar_value = hp_bar_content.internal_bar_value
-						local actual_active_percentage = content.actual_active_percentage or 1
-						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
-
-						return grim_progress < 1
-					end,
-					content_change_function = function (content, style)
-						local hp_bar_content = content.hp_bar
-						local internal_bar_value = hp_bar_content.internal_bar_value
-						local actual_active_percentage = content.actual_active_percentage or 1
-						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
-						local offset = style.offset
-						offset[1] = settings_controller_ui.hp_bar.x - 7 + 553 * grim_progress
-					end
-				},
-				{
-					pass_type = "gradient_mask_texture",
-					style_id = "hp_bar",
-					texture_id = "texture_id",
-					content_id = "hp_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.draw_health_bar
-					end
-				},
-				{
-					pass_type = "gradient_mask_texture",
-					style_id = "total_health_bar",
-					texture_id = "texture_id",
-					content_id = "total_health_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.draw_health_bar
-					end
-				},
-				{
-					style_id = "grimoire_bar",
-					pass_type = "texture_uv",
-					content_id = "grimoire_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_change_function = function (content, style)
-						local parent_content = content.parent
-						local hp_bar_content = parent_content.hp_bar
-						local internal_bar_value = hp_bar_content.internal_bar_value
-						local actual_active_percentage = parent_content.actual_active_percentage or 1
-						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
-						local size = style.size
-						local uvs = content.uvs
-						local offset = style.offset
-						local bar_length = 553
-						uvs[1][1] = grim_progress
-						size[1] = bar_length * (1 - grim_progress)
-						offset[1] = 2 + settings_controller_ui.hp_bar.x + bar_length * grim_progress
-					end
-				},
 				{
 					style_id = "hp_text",
 					pass_type = "text",
@@ -132,124 +56,9 @@ local function create_dynamic_health_widget_local_player_controller_ui()
 			}
 		},
 		content = {
-			grimoire_debuff_divider = "hud_player_hp_bar_grim_divider",
-			hp_bar_highlight = "hud_player_hp_bar_highlight",
-			bar_start_side = "left",
 			health_string = "",
-			hp_bar = {
-				bar_value = 1,
-				internal_bar_value = 0,
-				texture_id = "player_hp_bar_color_tint",
-				draw_health_bar = true
-			},
-			total_health_bar = {
-				bar_value = 1,
-				internal_bar_value = 0,
-				texture_id = "player_hp_bar",
-				draw_health_bar = true
-			},
-			grimoire_bar = {
-				texture_id = "hud_panel_hp_bar_bg_grimoire",
-				uvs = {
-					{
-						0,
-						0
-					},
-					{
-						1,
-						1
-					}
-				}
-			}
 		},
 		style = {
-			total_health_bar = {
-				gradient_threshold = 1,
-				size = {
-					553,
-					18
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings_controller_ui.hp_bar.x,
-					settings_controller_ui.hp_bar.y,
-					settings_controller_ui.hp_bar.z + 2
-				}
-			},
-			hp_bar = {
-				gradient_threshold = 1,
-				size = {
-					553,
-					18
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings_controller_ui.hp_bar.x,
-					settings_controller_ui.hp_bar.y,
-					settings_controller_ui.hp_bar.z + 3
-				}
-			},
-			grimoire_bar = {
-				size = {
-					553,
-					18
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings_controller_ui.hp_bar.x,
-					settings_controller_ui.hp_bar.y,
-					settings_controller_ui.hp_bar.z + 4
-				}
-			},
-			grimoire_debuff_divider = {
-				size = {
-					21,
-					36
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings_controller_ui.hp_bar.x + 10,
-					settings_controller_ui.hp_bar.y - 8,
-					settings_controller_ui.hp_bar.z + 20
-				}
-			},
-			hp_bar_highlight = {
-				size = {
-					553,
-					30
-				},
-				offset = {
-					settings_controller_ui.hp_bar.x,
-					settings_controller_ui.hp_bar.y - 4,
-					settings_controller_ui.hp_bar.z + 5
-				},
-				color = {
-					0,
-					255,
-					255,
-					255
-				}
-			},
 			-- health text
 			hp_text = {
 				vertical_alignment = "center",
@@ -277,15 +86,10 @@ local function create_dynamic_health_widget_local_player_controller_ui()
 				}
 			},			
 		},
-		offset = {
-			0,
-			0,
-			0
-		}
 	}
 end
 
--- unlike in PC UI, I can't just get away with parenting cooldown text relative to health widget, sooooooo...
+
 local function create_dynamic_ability_widget_local_player_controller_ui()
 	return {
 		scenegraph_id = "ability",
@@ -309,76 +113,13 @@ local function create_dynamic_ability_widget_local_player_controller_ui()
 					content_check_function = function (content)
 						return content.cooldown_string ~= "0:00"
 					end
-				},
-				{
-					style_id = "ability_bar",
-					pass_type = "texture",
-					texture_id = "texture_id",
-					content_id = "ability_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_change_function = function (content, style)
-						local ability_progress = content.bar_value
-						local size = style.texture_size
-						local offset = style.offset
-						offset[2] = -size[2] + size[2] * ability_progress
-					end
-				},
-				{
-					pass_type = "texture",
-					style_id = "ability_bar_mask",
-					texture_id = "ability_bar_mask",
-					retained_mode = RETAINED_MODE_ENABLED
 				},				
 			}
 		},
 		content = {
-			ability_bar_mask = "gamepad_ability_outline_mask",
-			bar_start_side = "left",
 			cooldown_string = "0:00",
-			ability_bar = {
-				bar_value = 1,
-				texture_id = "gamepad_ability_outline_fill"
-			}
 		},
 		style = {
-			ability_bar = {
-				vertical_alignment = "bottom",
-				horizontal_alignment = "right",
-				texture_size = {
-					101,
-					133
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					0,
-					0,
-					0
-				}
-			},
-			ability_bar_mask = {
-				vertical_alignment = "bottom",
-				horizontal_alignment = "right",
-				texture_size = {
-					96,
-					115
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					0,
-					0,
-					0
-				}
-			},
 			--ability timer text
 			cooldown_text = {
 				scenegraph_id = "ability_cooldown_root",
@@ -417,11 +158,6 @@ local function create_dynamic_ability_widget_local_player_controller_ui()
 				}
 			},
 		},
-		offset = {
-			-15,
-			15,
-			0
-		}
 	}
 end
 
@@ -445,80 +181,8 @@ local settings = {
 -- change our own healthbar
 local function create_dynamic_health_widget_local_player()
 	return {
-		scenegraph_id = "pivot",
 		element = {
 			passes = {
-				{
-					pass_type = "texture",
-					style_id = "hp_bar_highlight",
-					texture_id = "hp_bar_highlight",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content, style)
-						return not content.has_shield
-					end
-				},
-				{
-					style_id = "grimoire_debuff_divider",
-					texture_id = "grimoire_debuff_divider",
-					pass_type = "texture",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						local hp_bar_content = content.hp_bar
-						local internal_bar_value = hp_bar_content.internal_bar_value
-						local actual_active_percentage = content.actual_active_percentage or 1
-						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
-
-						return grim_progress < 1
-					end,
-					content_change_function = function (content, style)
-						local hp_bar_content = content.hp_bar
-						local internal_bar_value = hp_bar_content.internal_bar_value
-						local actual_active_percentage = content.actual_active_percentage or 1
-						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
-						local offset = style.offset
-						offset[1] = settings.hp_bar.x - 7 + 464 * grim_progress
-					end
-				},
-				{
-					pass_type = "gradient_mask_texture",
-					style_id = "hp_bar",
-					texture_id = "texture_id",
-					content_id = "hp_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.draw_health_bar
-					end
-				},
-				{
-					pass_type = "gradient_mask_texture",
-					style_id = "total_health_bar",
-					texture_id = "texture_id",
-					content_id = "total_health_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.draw_health_bar
-					end
-				},
-				{
-					style_id = "grimoire_bar",
-					pass_type = "texture_uv",
-					content_id = "grimoire_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_change_function = function (content, style)
-						local parent_content = content.parent
-						local hp_bar_content = parent_content.hp_bar
-						local internal_bar_value = hp_bar_content.internal_bar_value
-						local actual_active_percentage = parent_content.actual_active_percentage or 1
-						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
-						local size = style.size
-						local uvs = content.uvs
-						local offset = style.offset
-						local bar_length = 464
-						uvs[1][1] = grim_progress
-						size[1] = bar_length * (1 - grim_progress)
-						offset[1] = 2 + settings.hp_bar.x + bar_length * grim_progress
-					end
-				},
 				{
 					style_id = "hp_text",
 					pass_type = "text",
@@ -526,7 +190,6 @@ local function create_dynamic_health_widget_local_player()
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
 						return content.hp_bar.draw_health_bar
-						--return content.draw_health_bar
 					end
 				},
 				{
@@ -536,156 +199,16 @@ local function create_dynamic_health_widget_local_player()
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
 						return content.hp_bar.draw_health_bar
-						--return content.draw_health_bar
 					end
 				},
-				
-				-- ideally I should've put this somewhere but the health widget, so don't judge me :v
-				
-				{
-					style_id = "cooldown_text",
-					pass_type = "text",
-					text_id = "cooldown_string",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						if content.cooldown_string == "0:00" then return end
-						return content.hp_bar.draw_health_bar
-					end
-				},
-				{
-					style_id = "cooldown_text_shadow",
-					pass_type = "text",
-					text_id = "cooldown_string",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						if content.cooldown_string == "0:00" then return end
-						return content.hp_bar.draw_health_bar
-					end
-				},
-				
 			}
 		},
 		content = {
-			grimoire_debuff_divider = "hud_player_hp_bar_grim_divider",
-			hp_bar_highlight = "hud_player_hp_bar_highlight",
-			bar_start_side = "left",
 			health_string = "",
-			cooldown_string = "0:00",
-			hp_bar = {
-				bar_value = 1,
-				internal_bar_value = 0,
-				texture_id = "player_hp_bar_color_tint",
-				draw_health_bar = true
-			},
-			total_health_bar = {
-				bar_value = 1,
-				internal_bar_value = 0,
-				texture_id = "player_hp_bar",
-				draw_health_bar = true
-			},
-			grimoire_bar = {
-				texture_id = "hud_panel_hp_bar_bg_grimoire",
-				uvs = {
-					{
-						0,
-						0
-					},
-					{
-						1,
-						1
-					}
-				}
-			}
 		},
 		style = {
-			total_health_bar = {
-				gradient_threshold = 1,
-				size = {
-					464,
-					19
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings.hp_bar.x,
-					settings.hp_bar.y,
-					settings.hp_bar.z + 2
-				}
-			},
-			hp_bar = {
-				gradient_threshold = 1,
-				size = {
-					464,
-					19
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings.hp_bar.x,
-					settings.hp_bar.y,
-					settings.hp_bar.z + 3
-				}
-			},
-			grimoire_bar = {
-				size = {
-					464,
-					19
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings.hp_bar.x,
-					settings.hp_bar.y,
-					settings.hp_bar.z + 4
-				}
-			},
-			grimoire_debuff_divider = {
-				size = {
-					21,
-					36
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					settings.hp_bar.x + 10,
-					settings.hp_bar.y - 8,
-					settings.hp_bar.z + 20
-				}
-			},
-			hp_bar_highlight = {
-				size = {
-					464,
-					30
-				},
-				offset = {
-					settings.hp_bar.x,
-					settings.hp_bar.y - 4,
-					settings.hp_bar.z + 5
-				},
-				color = {
-					0,
-					255,
-					255,
-					255
-				}
-			},
 			hp_text = {
+				scenegraph_id = "pivot",
 				vertical_alignment = "center",
 				font_type = "hell_shark",
 				font_size = 24,
@@ -697,19 +220,60 @@ local function create_dynamic_health_widget_local_player()
 					225
 				},
 				offset = {
-					0, settings.hp_bar.y + 8, settings.hp_bar.z + 22
+					0,
+					settings.hp_bar.y + 8,
+					settings.hp_bar.z + 22 - 5
 				}
 			},
 			hp_text_shadow = {
+				scenegraph_id = "pivot",
 				vertical_alignment = "center",
 				font_type = "hell_shark",
 				font_size = 24,
 				horizontal_alignment = "center",
 				text_color = Colors.get_table("black"),
 				offset = {
-					2, settings.hp_bar.y + 8 - 2, settings.hp_bar.z + 21
+					2, 
+					settings.hp_bar.y + 8 - 2, 
+					settings.hp_bar.z + 21 - 5
 				}
 			},
+			
+		},
+	}
+end
+
+-- ability stuff
+local function create_dynamic_ability_widget_local_player()
+	return {
+		element = {
+			passes = {
+				{
+					style_id = "cooldown_text",
+					pass_type = "text",
+					text_id = "cooldown_string",
+					retained_mode = RETAINED_MODE_ENABLED,
+					content_check_function = function (content)
+						if content.cooldown_string == "0:00" then return end
+						return true
+					end
+				},
+				{
+					style_id = "cooldown_text_shadow",
+					pass_type = "text",
+					text_id = "cooldown_string",
+					retained_mode = RETAINED_MODE_ENABLED,
+					content_check_function = function (content)
+						if content.cooldown_string == "0:00" then return end
+						return true
+					end
+				},
+			}
+		},
+		content = {
+			cooldown_string = "0:00",
+		},
+		style = {
 			cooldown_text = {
 				word_wrap = false,
 				font_size = 16,
@@ -745,61 +309,14 @@ local function create_dynamic_health_widget_local_player()
 				}
 			},
 		},
-		offset = {
-			0,
-			0,
-			0
-		}
 	}
 end
 
+-- portrait
 local function create_dynamic_portait_widget_local_player()
 	return {
-		scenegraph_id = "pivot",
 		element = {
 			passes = {
-				{
-					pass_type = "texture",
-					style_id = "portrait_icon",
-					texture_id = "portrait_icon",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.display_portrait_icon
-					end
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator",
-					texture_id = "talk_indicator",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator_glow",
-					texture_id = "talk_indicator_glow",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator_highlight",
-					texture_id = "talk_indicator_highlight",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator_highlight_glow",
-					texture_id = "talk_indicator_highlight_glow",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "rotated_texture",
-					style_id = "connecting_icon",
-					texture_id = "connecting_icon",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.connecting
-					end
-				},
 				{
 					pass_type = "texture",
 					style_id = "wounded_icon",
@@ -812,136 +329,10 @@ local function create_dynamic_portait_widget_local_player()
 			}
 		},
 		content = {
-			display_portrait_overlay = false,
-			connecting = false,
-			display_portrait_icon = false,
 			is_at_deaths_door = false,
 			wounded_icon = "tabs_icon_all_selected",
-			connecting_icon = "matchmaking_connecting_icon",
-			talk_indicator_highlight = "voip_wave",
-			talk_indicator_highlight_glow = "voip_wave_glow",
-			talk_indicator = "voip_speaker",
-			talk_indicator_glow = "voip_speaker_glow",
-			portrait_icon = "status_icon_needs_assist"
 		},
 		style = {
-			talk_indicator = {
-				scenegraph_id = "portrait_pivot",
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					6,
-					3
-				},
-				color = {
-					0,
-					255,
-					255,
-					255
-				}
-			},
-			talk_indicator_glow = {
-				scenegraph_id = "portrait_pivot",
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					6,
-					2
-				},
-				color = {
-					0,
-					0,
-					0,
-					0
-				}
-			},
-			talk_indicator_highlight = {
-				scenegraph_id = "portrait_pivot",
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					6,
-					3
-				},
-				color = {
-					0,
-					255,
-					255,
-					255
-				}
-			},
-			talk_indicator_highlight_glow = {
-				scenegraph_id = "portrait_pivot",
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					6,
-					2
-				},
-				color = {
-					0,
-					0,
-					0,
-					0
-				}
-			},
-			connecting_icon = {
-				vertical_alignment = "center",
-				scenegraph_id = "portrait_pivot",
-				horizontal_alignment = "center",
-				angle = 0,
-				pivot = {
-					26.5,
-					26.5
-				},
-				texture_size = {
-					53,
-					53
-				},
-				offset = {
-					0,
-					0,
-					12
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				}
-			},
-			portrait_icon = {
-				vertical_alignment = "center",
-				scenegraph_id = "portrait_pivot",
-				horizontal_alignment = "center",
-				texture_size = {
-					86,
-					108
-				},
-				offset = {
-					0,
-					0,
-					7
-				},
-				color = {
-					150,
-					255,
-					255,
-					255
-				}
-			},
 			wounded_icon = {
 				scenegraph_id = "portrait_pivot",
 				size = {
@@ -961,11 +352,6 @@ local function create_dynamic_portait_widget_local_player()
 				}
 			},
 		},
-		offset = {
-			0,
-			0,
-			0
-		}
 	}
 end
 
@@ -1062,107 +448,7 @@ end
 -- fix healthbar frame, since it's going to be a bit bigger
 local function create_static_widget()
 	return {
-		scenegraph_id = "pivot",
-		element = {
-			passes = {
-				{
-					pass_type = "texture",
-					style_id = "character_portrait",
-					texture_id = "character_portrait",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					style_id = "player_level",
-					pass_type = "text",
-					text_id = "player_level",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "host_icon",
-					texture_id = "host_icon",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.is_host
-					end
-				},
-				{
-					style_id = "player_name",
-					pass_type = "text",
-					text_id = "player_name",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					style_id = "player_name_shadow",
-					pass_type = "text",
-					text_id = "player_name",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "hp_bar_bg",
-					texture_id = "hp_bar_bg",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "hp_bar_fg",
-					texture_id = "hp_bar_fg",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "ability_bar_bg",
-					texture_id = "ability_bar_bg",
-					retained_mode = RETAINED_MODE_ENABLED
-				}
-			}
-		},
-		content = {
-			character_portrait = "unit_frame_portrait_default",
-			player_name = "n/a",
-			host_icon = "host_icon",
-			hp_bar_bg = "hud_teammate_hp_bar_bg",
-			is_host = false,
-			player_level = "",
-			hp_bar_fg = "hud_teammate_hp_bar_frame",
-			ability_bar_bg = "hud_teammate_ability_bar_bg"
-		},
 		style = {
-			character_portrait = {
-				size = {
-					86 * portrait_scale,
-					108 * portrait_scale
-				},
-				offset = {
-					-43 * portrait_scale,
-					-54 * portrait_scale + 55 * portrait_scale,
-					0
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				}
-			},
-			host_icon = {
-				size = {
-					18,
-					14
-				},
-				offset = {
-					-50,
-					10,
-					50
-				},
-				color = {
-					150,
-					255,
-					255,
-					255
-				}
-			},
 			player_level = {
 				vertical_alignment = "top",
 				font_type = "hell_shark",
@@ -1202,7 +488,7 @@ local function create_static_widget()
 			hp_bar_bg = {
 				size = {
 					100 + diff,
-					30--17
+					30
 				},
 				offset = {
 					(health_bar_offset[1] + health_bar_size[1] / 2) - 50 - diff/2,
@@ -1219,7 +505,7 @@ local function create_static_widget()
 			hp_bar_fg = {
 				size = {
 					100 + diff,
-					37--24
+					37
 				},
 				offset = {
 					(health_bar_offset[1] + health_bar_size[1] / 2) - 50 - diff/2,
@@ -1251,62 +537,35 @@ local function create_static_widget()
 				}
 			}
 		},
-		offset = {
-			0,
-			-55 * portrait_scale,
-			0
-		}
 	}
 end
 
--- replace old ammo indicator with a new one (I know there are leftovers from overcharge that I had to disable, but whatever)
+-- ammo and other things
 local function create_dynamic_portait_widget()
 	return {
-		scenegraph_id = "pivot",
 		element = {
 			passes = {
+				-- disable existing ammo counter by overriding these 2 passes
 				{
 					pass_type = "texture",
-					style_id = "portrait_icon",
-					texture_id = "portrait_icon",
+					style_id = "ammo_indicator",
+					texture_id = "ammo_indicator",
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
-						return content.display_portrait_icon
-					end
+						return false
+					end,
 				},
 				{
 					pass_type = "texture",
-					style_id = "talk_indicator",
-					texture_id = "talk_indicator",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator_glow",
-					texture_id = "talk_indicator_glow",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator_highlight",
-					texture_id = "talk_indicator_highlight",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "texture",
-					style_id = "talk_indicator_highlight_glow",
-					texture_id = "talk_indicator_highlight_glow",
-					retained_mode = RETAINED_MODE_ENABLED
-				},
-				{
-					pass_type = "rotated_texture",
-					style_id = "connecting_icon",
-					texture_id = "connecting_icon",
+					style_id = "ammo_indicator",
+					texture_id = "ammo_indicator_empty",
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
-						return content.connecting
-					end
+						return false
+					end,
 				},
+				
+				-- our ammo counters
 				{
 					pass_type = "texture",
 					style_id = "ammo_indicator_full",
@@ -1315,7 +574,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix
 						local check = ammo_progress and ammo_progress <= 1 and ammo_progress > 0.5
 						return not content.is_overcharge and check
 					end
@@ -1328,7 +587,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix
 						local check = ammo_progress and ammo_progress <= 0.5 and ammo_progress > 0.25
 						return not content.is_overcharge and check
 					end
@@ -1341,7 +600,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix
 						local check = ammo_progress and ammo_progress <= 0.25 and ammo_progress > 0
 						return not content.is_overcharge and check
 					end
@@ -1354,7 +613,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix
 						local check = ammo_progress and ammo_progress == 0
 						return not content.is_overcharge and check 
 					end
@@ -1371,7 +630,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix
 						local check = ammo_progress and ammo_progress >= 0
 						return not content.is_overcharge and check
 					end
@@ -1388,7 +647,7 @@ local function create_dynamic_portait_widget()
 					content_check_function = function (content)
 						if content.ammo_string and content.ammo_string == "-1" then return false end
 						if content.ammo_string and content.ammo_string == "-1/-1" then return false end
-						local ammo_progress = content.ammo_percent_fix--content.ammo_percent
+						local ammo_progress = content.ammo_percent_fix
 						local check = ammo_progress and ammo_progress >= 0
 						return not content.is_overcharge and check
 					end
@@ -1400,7 +659,6 @@ local function create_dynamic_portait_widget()
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
 						return false
-						--return content.is_overcharge
 					end
 				},
 				{
@@ -1410,7 +668,6 @@ local function create_dynamic_portait_widget()
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
 						return false -- until there is a way to get overcharge
-						--return content.is_overcharge
 					end
 				},
 				{
@@ -1420,7 +677,6 @@ local function create_dynamic_portait_widget()
 					retained_mode = RETAINED_MODE_ENABLED,
 					content_check_function = function (content)
 						return false -- until there is a way to get overcharge
-						--return content.is_overcharge
 					end
 				},
 				{
@@ -1468,42 +724,16 @@ local function create_dynamic_portait_widget()
 			}
 		},
 		content = {
-			talk_indicator_highlight = "voip_wave",
-			connecting = false,
-			talk_indicator_glow = "voip_speaker_glow",
-			talk_indicator_highlight_glow = "voip_wave_glow",
-			talk_indicator = "voip_speaker",
 			ammo_string = "-1",
 			ammo_style = 1,
 			ammo_percent_fix = 1,
 			overcharge_icon = "tooltip_icon_overheat",
 			is_overcharge = false,
-			display_portrait_icon = false,
-			ammo_indicator_empty = "unit_frame_ammo_empty",
-			bar_start_side = "left",
-			portrait_icon = "status_icon_needs_assist",
-			display_portrait_overlay = false,
-			connecting_icon = "matchmaking_connecting_icon",
 			wounded_icon = "tabs_icon_all_selected",
 			nb_icon = "necklace_no_healing_health_regen",
-			is_at_deaths_door = false, -- something about how quickly the tide turns
+			is_at_deaths_door = false,
 			has_natural_bond = false,
-			ammo_indicator = "unit_frame_ammo_low",
 			cooldown_string = "0:00",
-			ammo_bar = {
-				bar_value = 1,
-				texture_id = "hud_teammate_ammo_bar_fill",
-				uvs = {
-					{
-						0,
-						0
-					},
-					{
-						1,
-						1
-					}
-				}
-			}
 		},
 		style = {
 			-- 50 - 100%
@@ -1514,7 +744,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					55 + 5,
-					55, -- -40
+					55,
 					5
 				},
 				color = {
@@ -1532,7 +762,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					55 + 5,
-					55, -- -40
+					55,
 					5
 				},
 				color = {
@@ -1550,13 +780,13 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					55 + 5,
-					55, -- -40
+					55,
 					5
 				},
 				color = {
 					255,
 					255,
-					148, --128
+					148,
 					255
 				}
 			},
@@ -1568,7 +798,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					55 + 5,
-					55, -- -40
+					55,
 					5
 				},
 				color = {
@@ -1585,7 +815,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					55 + 5,
-					46, -- 55 -40
+					46,
 					5
 				},
 				color = {
@@ -1603,7 +833,7 @@ local function create_dynamic_portait_widget()
 				text_color = Colors.get_table("white"),
 				offset = {
 					60 + 8 + 6,
-					45, -- -40
+					45,
 					51
 				}
 			},
@@ -1615,7 +845,7 @@ local function create_dynamic_portait_widget()
 				text_color = Colors.get_table("black"),
 				offset = {
 					60 + 8 + 8,
-					45 - 2, -- -40
+					45 - 2,
 					50
 				}
 			},
@@ -1626,7 +856,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					60,
-					-45, -- 55 -40
+					-45,
 					5
 				},
 				color = {
@@ -1665,7 +895,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					64,
-					0, -- -2 -75
+					0,
 					5
 				}
 			},
@@ -1681,7 +911,7 @@ local function create_dynamic_portait_widget()
 				},
 				offset = {
 					66,
-					-2, -- -2 -77
+					-2,
 					4
 				}
 			},
@@ -1693,7 +923,7 @@ local function create_dynamic_portait_widget()
 				text_color = Colors.get_table("white"),
 				offset = {
 					60 + 8 + 10,
-					45, -- -40
+					45,
 					5
 				}
 			},
@@ -1705,115 +935,8 @@ local function create_dynamic_portait_widget()
 				text_color = Colors.get_table("black"),
 				offset = {
 					60 + 8 + 10,
-					45 - 2, -- -40
+					45 - 2,
 					4
-				}
-			},
-			talk_indicator = {
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					30,
-					3
-				},
-				color = {
-					0,
-					255,
-					255,
-					255
-				}
-			},
-			talk_indicator_glow = {
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					30,
-					2
-				},
-				color = {
-					0,
-					0,
-					0,
-					0
-				}
-			},
-			talk_indicator_highlight = {
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					30,
-					3
-				},
-				color = {
-					0,
-					255,
-					255,
-					255
-				}
-			},
-			talk_indicator_highlight_glow = {
-				size = {
-					64,
-					64
-				},
-				offset = {
-					60,
-					30,
-					2
-				},
-				color = {
-					0,
-					0,
-					0,
-					0
-				}
-			},
-			connecting_icon = {
-				angle = 0,
-				size = {
-					53,
-					53
-				},
-				offset = {
-					-25,
-					34,
-					15
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				pivot = {
-					27,
-					27
-				}
-			},
-			portrait_icon = {
-				size = {
-					86 * portrait_scale,
-					108 * portrait_scale
-				},
-				offset = {
-					-(86 * portrait_scale) / 2,
-					0,
-					1
-				},
-				color = {
-					150,
-					255,
-					255,
-					255
 				}
 			}
 		},
@@ -1829,18 +952,8 @@ end
 -- change health widget + health numbers
 local function create_dynamic_health_widget()
 	return {
-		scenegraph_id = "pivot",
 		element = {
 			passes = {
-				{
-					pass_type = "texture",
-					style_id = "hp_bar_highlight",
-					texture_id = "hp_bar_highlight",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content, style)
-						return not content.has_shield
-					end
-				},
 				{
 					style_id = "grimoire_debuff_divider",
 					texture_id = "grimoire_debuff_divider",
@@ -1856,26 +969,6 @@ local function create_dynamic_health_widget()
 						local grim_progress = math.max(internal_bar_value, actual_active_percentage)
 						local offset = style.offset
 						offset[1] = health_bar_offset[1] + health_bar_size[1] * grim_progress
-					end
-				},
-				{
-					pass_type = "gradient_mask_texture",
-					style_id = "hp_bar",
-					texture_id = "texture_id",
-					content_id = "hp_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.draw_health_bar
-					end
-				},
-				{
-					pass_type = "gradient_mask_texture",
-					style_id = "total_health_bar",
-					texture_id = "texture_id",
-					content_id = "total_health_bar",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.draw_health_bar
 					end
 				},
 				{
@@ -1896,24 +989,6 @@ local function create_dynamic_health_widget()
 						uvs[1][1] = grim_progress
 						size[1] = bar_length * (1 - grim_progress)
 						offset[1] = 2 + health_bar_offset[1] + bar_length * grim_progress
-					end
-				},
-				{
-					pass_type = "texture",
-					style_id = "hp_bar",
-					texture_id = "hp_bar_mask",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.hp_bar.draw_health_bar
-					end
-				},
-				{
-					pass_type = "texture",
-					style_id = "portrait_icon",
-					texture_id = "portrait_icon",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.display_portrait_icon
 					end
 				},
 				{
@@ -1942,35 +1017,6 @@ local function create_dynamic_health_widget()
 		},
 		content = {
 			health_string = "",
-			grimoire_debuff_divider = "hud_teammate_hp_bar_grim_divider",
-			hp_bar_highlight = "hud_teammate_hp_bar_highlight",
-			bar_start_side = "left",
-			hp_bar_mask = "teammate_hp_bar_mask",
-			hp_bar = {
-				bar_value = 1,
-				internal_bar_value = 0,
-				texture_id = "teammate_hp_bar_color_tint_1",
-				draw_health_bar = true
-			},
-			total_health_bar = {
-				bar_value = 1,
-				internal_bar_value = 0,
-				texture_id = "teammate_hp_bar_1",
-				draw_health_bar = true
-			},
-			grimoire_bar = {
-				texture_id = "hud_panel_hp_bar_bg_grimoire",
-				uvs = {
-					{
-						0,
-						0
-					},
-					{
-						1,
-						1
-					}
-				}
-			}
 		},
 		style = {
 			total_health_bar = {
@@ -2081,13 +1127,7 @@ local function create_dynamic_health_widget()
 					1, health_bar_offset[2] + health_bar_size[2] / 2 - 2 - 1, health_bar_offset[3] + 24
 				}
 			}
-			
 		},
-		offset = {
-			0,
-			-55 * portrait_scale,
-			0
-		}
 	}
 end
 
@@ -2095,7 +1135,7 @@ local career_ammo = {}
 local career_talents_ammo = {}
 local cooldown_table = {}
 
--- sigh, maybe this time it will work with all upcoming careers
+-- technically there is a way to get ammo properly, but I mean this works too so far
 
 for career, settings in pairs( CareerSettings ) do
 	
@@ -2131,7 +1171,6 @@ for career, settings in pairs( CareerSettings ) do
 	
 end
 
--- based on the only way to get ammo from teammates
 local ammo_delta = 0.005
 local function calculate_ammo( weapon_template, game, go_id, career_extension, data, player_unit )
 
@@ -2244,61 +1283,148 @@ local function calculate_ammo( weapon_template, game, go_id, career_extension, d
 	
 end
 
+-- instead of copy pasting entire definitions, we will add changes on top of existing ones
+local function MergeDefinitions( from, to )
+	
+	if from and to then
+		
+		for key, tbl in pairs( from ) do
+			
+			-- copy scenegraph/offset if needed
+			if key == "scenegraph_id" or key == "offset" then
+			
+				if to[ key ] and from[ key ] then
+					to[ key ] = from[ key ]
+				end
+			
+			-- merge pass tables, override if needed
+			elseif key == "element" then
+				
+				if from[ key ] and from[ key ][ "passes" ] and to[ key ] and to[ key ][ "passes" ] then
+					
+					local add_later = {}
+					
+					for override_pass_id, override_pass_tbl in pairs ( from[ key ][ "passes" ] ) do
+						
+						local new_pass = true
+						
+						for pass_id, pass_tbl in pairs ( to[ key ][ "passes" ] ) do 
+							
+							-- override default pass with our own if there is one
+							if pass_tbl.style_id and override_pass_tbl.style_id and pass_tbl.style_id == override_pass_tbl.style_id then
+		
+								local skip = false
+								
+								-- if its a texture, make sure we wont override something that has same style_id
+								if pass_tbl.texture_id ~= nil and override_pass_tbl.texture_id ~= nil and pass_tbl.texture_id ~= override_pass_tbl.texture_id then 
+									skip = true
+								end
+		
+								if not skip then
+									to[ key ][ "passes" ][ pass_id ] = override_pass_tbl
+									new_pass = false
+									break
+								end
+								
+							end
+							
+						end
+						
+						if new_pass then
+							table.insert( add_later, override_pass_tbl )
+						end
+						
+					end
+					
+					-- add all stored passes too
+					
+					for k, stored_pass in pairs( add_later ) do
+						table.insert( to[ key ][ "passes" ], stored_pass )
+					end
+					
+				end
+			
+			-- content/styles
+			else
+				-- check for table type just in case
+				if to[ key ] and from[ key ] and type( to[ key ] ) == "table" and type( from[ key ] ) == "table" then
+					
+					for k, var in pairs( from[ key ] ) do
+						to[ key ][ k ] = var
+					end
+					
+				end
+				
+			end
+			
+		end
+	
+	end
+	
+end
+
 -- inject our own definitions into UnitFrameHandler
 -- "UnitFramesHandler._create_unit_frame_by_type"
 mod:hook( UnitFramesHandler, "_create_unit_frame_by_type", function (func, self, frame_type, frame_index)
-	local ingame_ui_context = self.ingame_ui_context
-	local unit_frame = {}
-	local state_data = {}
-	local player_data = {}
-	local definitions = nil
 	
-	if frame_type == "team" then
-		definitions = local_require("scripts/ui/hud_ui/team_member_unit_frame_ui_definitions")
+	local unit_frame = {}
+	
+	local ingame_ui_context = self.ingame_ui_context
+	local is_dark_pact = self._is_dark_pact
+
+	unit_frame = func( self, frame_type, frame_index )
+
+	-- skip the versus team (for now?)
+	if is_dark_pact then return unit_frame end
+	
+	if frame_type == "player" then
 		
+		-- merge player ui changes
 		mod:pcall( function() 
-			definitions.widget_definitions.default_static = create_static_widget()
-			definitions.widget_definitions.health_dynamic = create_dynamic_health_widget()
-			definitions.widget_definitions.ability_dynamic = create_dynamic_ability_widget()
-			definitions.widget_definitions.default_dynamic = create_dynamic_portait_widget()
-			definitions.widget_definitions.loadout_dynamic.offset = override_dynamic_loadout_widget_offset
+			
+			unit_frame.widget:destroy()
+			
+			-- controller ui
+			if unit_frame.gamepad_version then
+				
+				unit_frame.definitions.scenegraph_definition.ability_cooldown_root = custom_controller_ui_scenegraph
+				
+				MergeDefinitions( create_dynamic_health_widget_local_player_controller_ui(), unit_frame.definitions.widget_definitions.health_dynamic )
+				MergeDefinitions( create_dynamic_ability_widget_local_player_controller_ui(), unit_frame.definitions.widget_definitions.ability_dynamic )
+				MergeDefinitions( create_dynamic_portait_widget_local_player(), unit_frame.definitions.widget_definitions.default_dynamic )
+			
+			-- default ui
+			else
+				
+				MergeDefinitions( create_dynamic_health_widget_local_player(), unit_frame.definitions.widget_definitions.health_dynamic )
+				MergeDefinitions( create_dynamic_ability_widget_local_player(), unit_frame.definitions.widget_definitions.ability_dynamic )
+				MergeDefinitions( create_dynamic_portait_widget_local_player(), unit_frame.definitions.widget_definitions.default_dynamic )
+				
+			end
+			
+			unit_frame.widget = UnitFrameUI:new(ingame_ui_context, unit_frame.definitions, unit_frame.data, frame_index, unit_frame.player_data, frame_type)
+			
 		end )
 		
-	elseif frame_type == "player" then
-		local gamepad_active = self.input_manager:is_device_active("gamepad")
-		
-		if self.platform ~= "win32" or ((gamepad_active or UISettings.use_gamepad_hud_layout == "always") and UISettings.use_gamepad_hud_layout ~= "never") then
-			definitions = local_require("scripts/ui/hud_ui/player_console_unit_frame_ui_definitions")
-			unit_frame.gamepad_version = true
-			
-			mod:pcall( function()
-				-- make something that we can anchor our cooldown text to
-				definitions.scenegraph_definition.ability_cooldown_root = custom_controller_ui_scenegraph
-			
-				definitions.widget_definitions.health_dynamic = create_dynamic_health_widget_local_player_controller_ui()
-				definitions.widget_definitions.ability_dynamic = create_dynamic_ability_widget_local_player_controller_ui()
-				-- portrait area seems to be the same as PC one, so lets just copy that one instead
-				definitions.widget_definitions.default_dynamic = create_dynamic_portait_widget_local_player()
-			end )
-		else
-			definitions = local_require("scripts/ui/hud_ui/player_unit_frame_ui_definitions")
-		
-			mod:pcall( function() 
-				definitions.widget_definitions.health_dynamic = create_dynamic_health_widget_local_player()
-				definitions.widget_definitions.default_dynamic = create_dynamic_portait_widget_local_player()
-			end )
-		end
-		
 	else
-		definitions = local_require("scripts/ui/hud_ui/team_member_unit_frame_ui_definitions")
+		-- merge team frames changes
+		mod:pcall( function() 
+			
+			unit_frame.widget:destroy()
+		
+			MergeDefinitions( create_static_widget(), unit_frame.definitions.widget_definitions.default_static )
+			MergeDefinitions( create_dynamic_health_widget(), unit_frame.definitions.widget_definitions.health_dynamic )
+			MergeDefinitions( create_dynamic_ability_widget(), unit_frame.definitions.widget_definitions.ability_dynamic )
+			MergeDefinitions( create_dynamic_portait_widget(), unit_frame.definitions.widget_definitions.default_dynamic )
+			
+			-- offset this a little bit too
+			unit_frame.definitions.widget_definitions.loadout_dynamic.offset = override_dynamic_loadout_widget_offset
+			
+			unit_frame.widget = UnitFrameUI:new(ingame_ui_context, unit_frame.definitions, unit_frame.data, frame_index, unit_frame.player_data, frame_type)
+			
+		end )
+		
 	end
-	
-	unit_frame.data = state_data
-	unit_frame.player_data = player_data
-	unit_frame.definitions = definitions
-	unit_frame.features_list = definitions.features_list
-	unit_frame.widget_name_by_feature = definitions.widget_name_by_feature	
-	unit_frame.widget = UnitFrameUI:new(ingame_ui_context, definitions, state_data, frame_index, player_data)
 
 	return unit_frame	
 end)
@@ -2539,7 +1665,7 @@ mod:hook( UnitFramesHandler, "_sync_player_stats", function (func, self, unit_fr
 		
 			data.cur_cooldown = cur_cooldown
 			
-			local widget2 = player_data.own_player and ( unit_frame.gamepad_version and widget:_widget_by_feature("ability", "dynamic") or widget:_widget_by_feature("health", "dynamic") ) or widget:_widget_by_feature("default", "dynamic")
+			local widget2 = player_data.own_player and widget:_widget_by_feature("ability", "dynamic") or widget:_widget_by_feature("default", "dynamic")
 
 			if widget2 then
 				local widget2_content = widget2.content
@@ -2796,4 +1922,3 @@ end
 mod.on_enabled = function(is_first_call)
 	
 end
-
