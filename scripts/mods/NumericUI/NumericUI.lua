@@ -205,6 +205,7 @@ local function create_dynamic_health_widget_local_player()
 		},
 		content = {
 			health_string = "",
+			cooldown_string = "0:00", -- UI Tweaks backward compatibility
 		},
 		style = {
 			hp_text = {
@@ -1684,6 +1685,16 @@ mod:hook( UnitFramesHandler, "_sync_player_stats", function (func, self, unit_fr
 				
 				if dont_draw then
 					widget2_content.cooldown_string = "0:00"
+				end
+				
+				-- UI Tweaks backward compatibility
+				if player_data.own_player then
+					local widget_hp = widget:_widget_by_feature("health", "dynamic")
+	
+					if widget_hp then
+						widget_hp.content.cooldown_string = widget2_content.cooldown_string
+						widget:_set_widget_dirty( widget_hp )
+					end
 				end
 				
 				
