@@ -209,7 +209,6 @@ local function create_dynamic_health_widget_local_player()
 		},
 		style = {
 			hp_text = {
-				scenegraph_id = "pivot",
 				vertical_alignment = "center",
 				font_type = "hell_shark",
 				font_size = 24,
@@ -221,23 +220,30 @@ local function create_dynamic_health_widget_local_player()
 					225
 				},
 				offset = {
-					0,
-					settings.hp_bar.y + 8,
-					settings.hp_bar.z + 22 - 5
-				}
+					-232,
+					settings.hp_bar.y - 3,
+					settings.hp_bar.z + 30
+				},
+				size = {
+					464,
+					21,
+				},
 			},
 			hp_text_shadow = {
-				scenegraph_id = "pivot",
 				vertical_alignment = "center",
 				font_type = "hell_shark",
 				font_size = 24,
 				horizontal_alignment = "center",
 				text_color = Colors.get_table("black"),
 				offset = {
-					2, 
-					settings.hp_bar.y + 8 - 2, 
-					settings.hp_bar.z + 21 - 5
-				}
+					-230, 
+					settings.hp_bar.y - 3 - 2,
+					settings.hp_bar.z + 29
+				},
+				size = {
+					464,
+					21,
+				},
 			},
 			
 		},
